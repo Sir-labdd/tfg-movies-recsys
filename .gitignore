@@ -1,19 +1,20 @@
-# Datos (nunca subir a Git, ocupan mucho)
+
+# Data (never commit, takes up too much space)
 data/raw/
 data/processed/
 data/exports/
 
-# Entorno virtual de Python
+# Python virtual environment
 .venv/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
-# Configuración local con secretos
+# Local config with secrets
 .env
 .env.local
 
-# Builds y caches de Gradle/Kotlin
+# Gradle / Kotlin builds and caches
 .gradle/
 build/
 out/
@@ -24,6 +25,9 @@ out/
 *.iml
 .vscode/
 
-# Sistema operativo
+# OS
 .DS_Store
 Thumbs.db
+
+# uv: lock file is versioned, venv is not
+.python-version

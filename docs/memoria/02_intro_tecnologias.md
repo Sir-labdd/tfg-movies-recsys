@@ -1,0 +1,113 @@
+# TFG — Bloque 1: Introducción y Tecnologías
+
+> **Borrador para revisión.** Este documento cubre el apartado **5. Introducción** completo y la **subsección de Tecnologías** que se integrará dentro del apartado **7. Desarrollo** de la memoria. Mantiene el tono impersonal y académico iniciado en el documento anterior.
+
+---
+
+## 5. Introducción
+
+### 5.1. Contexto del dominio: el análisis de datos cinematográficos
+
+La industria cinematográfica produce, cataloga y consume una cantidad creciente de información estructurada sobre las películas y los profesionales que las realizan. Plataformas como The Movie Database (TMDB), Internet Movie Database (IMDb), Letterboxd o JustWatch han desarrollado bases de datos con decenas de millones de registros que abarcan títulos, sinopsis, equipos artísticos y técnicos, presupuestos, recaudaciones, valoraciones y otros metadatos asociados a cada producción. Esta información, históricamente accesible únicamente a profesionales del sector, ha pasado en las últimas décadas a estar disponible al público general en forma de aplicaciones web interactivas, lo que ha generado una nueva categoría de productos digitales orientados al descubrimiento, la consulta y la recomendación de contenido audiovisual.
+
+Las soluciones existentes en este ámbito se pueden clasificar de forma simplificada en cuatro categorías. En primer lugar, los **catálogos descriptivos** como IMDb o TMDB, cuya función principal es servir como fuente exhaustiva de información de referencia sobre las producciones. En segundo lugar, las **plataformas sociales** como Letterboxd, que añaden una capa de interacción comunitaria donde los usuarios valoran, comentan y elaboran listas personales. En tercer lugar, los **servicios agregadores** como JustWatch, cuya propuesta de valor es informar al usuario de en qué plataforma de streaming puede consumir cada título. Finalmente, las propias **plataformas de streaming** (Netflix, Prime Video, Filmin) incorporan sistemas internos de recomendación cuya finalidad principal es maximizar el tiempo de visionado de cada usuario.
+
+Existe un denominador común a todas las soluciones anteriores: todas ellas combinan, en mayor o menor grado, **funcionalidades de catálogo** (búsqueda, filtrado, ficha de detalle) con **funcionalidades de recomendación** (sugerencias personalizadas o no, contenido relacionado, listados temáticos). El presente proyecto se inscribe dentro de esta misma categoría general, si bien con tres diferencias significativas respecto a las soluciones comerciales referidas. Primera, su carácter exclusivamente académico, lo que permite priorizar la transparencia de las técnicas empleadas frente al valor comercial de las mismas. Segunda, su enfoque sobre un dataset abierto y reproducible, lo que facilita la verificación de los resultados por parte de terceros. Tercera, la integración explícita de técnicas modernas de procesamiento del lenguaje natural (concretamente, embeddings semánticos) como mecanismo central del sistema de recomendación, en lugar de los enfoques tradicionales basados en metadatos categóricos o en filtrado colaborativo puro.
+
+### 5.2. Fundamentos teóricos de los sistemas de recomendación
+
+Un **sistema de recomendación** es, en términos generales, un programa informático capaz de sugerir a un usuario elementos de un catálogo que probablemente le resulten relevantes, partiendo de información previa sobre el usuario, sobre los propios elementos, o sobre ambos. La literatura especializada distingue tradicionalmente tres familias principales de sistemas de recomendación, con caracterizaciones bien establecidas desde los trabajos seminales de la década de 1990.
+
+El **filtrado colaborativo** parte de la hipótesis de que usuarios con preferencias similares en el pasado tenderán a coincidir en sus preferencias futuras. Para emitir una recomendación, el sistema identifica usuarios cuyas valoraciones previas se asemejan a las del usuario activo y agrega las valoraciones de aquellos. Esta familia incluye tanto enfoques basados en vecindad (memory-based) como enfoques basados en modelos como la descomposición en valores singulares (SVD) o sus extensiones. Sus principales fortalezas son la capacidad de descubrir relaciones no evidentes a partir del propio comportamiento agregado de los usuarios, sin necesidad de modelar explícitamente las características de los elementos. Sus principales limitaciones son el llamado *cold start*, esto es, la incapacidad para emitir recomendaciones cuando un usuario o un elemento dispone de pocas o ninguna valoración previa, así como la dependencia de un volumen significativo de datos de interacción.
+
+La **recomendación basada en contenido** opera de forma radicalmente distinta. En lugar de analizar el comportamiento agregado de los usuarios, este enfoque construye una representación vectorial de cada elemento del catálogo a partir de sus atributos intrínsecos (en el caso de las películas: géneros, sinopsis, palabras clave, equipo creativo, etcétera), y emite recomendaciones devolviendo los elementos cuya representación es más cercana, según alguna métrica de distancia, a la del elemento de referencia. Esta familia no presenta el problema del *cold start* en el lado de los elementos, dado que un elemento puede ser representado y recomendado desde el momento mismo de su incorporación al catálogo, antes de recibir valoración alguna. Sus limitaciones se relacionan con la calidad de la representación vectorial empleada: si dicha representación captura únicamente atributos superficiales (por ejemplo, una bolsa de palabras sobre la sinopsis), las recomendaciones tienden a ser superficiales también.
+
+Por último, los **sistemas híbridos** combinan ambos enfoques de formas diversas, generalmente para mitigar las limitaciones de cada uno por separado. La literatura reciente reporta consistentemente que los sistemas híbridos producen mejores resultados que los enfoques puros, si bien a costa de mayor complejidad de implementación y mayor coste computacional.
+
+El presente proyecto se centra en un sistema de recomendación basado en contenido, con la particularidad de emplear una representación vectorial moderna basada en embeddings semánticos. Esta decisión se justifica por dos motivos. Primero, la ausencia de un sistema de cuentas de usuario en el alcance del proyecto hace inviable un enfoque colaborativo. Segundo, los embeddings semánticos modernos producen representaciones vectoriales sustancialmente más ricas que las técnicas tradicionales basadas en bolsa de palabras o TF-IDF, lo que permite obtener recomendaciones de calidad notable a partir únicamente del contenido textual disponible.
+
+### 5.3. Embeddings semánticos y búsqueda por similitud vectorial
+
+Un **embedding** es una representación numérica densa y de dimensión fija de un objeto cualquiera —en el contexto de este proyecto, de un texto— que tiene la propiedad de preservar relaciones semánticas en el espacio vectorial resultante. Dicho de forma intuitiva: dos textos con significado parecido producen vectores cercanos en dicho espacio, y dos textos con significado distinto producen vectores alejados. Esta propiedad permite resolver problemas de búsqueda semántica y de recomendación por similitud que serían difíciles o imposibles de abordar con técnicas léxicas tradicionales.
+
+La idea de representar palabras como vectores en un espacio continuo se consolidó con la publicación de Word2Vec (Mikolov et al., 2013), que demostró que entrenando una red neuronal poco profunda para predecir palabras a partir de su contexto era posible obtener representaciones vectoriales que capturaban relaciones semánticas y sintácticas sorprendentemente ricas. Esta línea evolucionó posteriormente hacia modelos contextuales como ELMo y, sobre todo, hacia los modelos basados en la arquitectura Transformer (Vaswani et al., 2017) y sus desarrollos posteriores como BERT (Devlin et al., 2018). El paso siguiente, particularmente relevante para sistemas de recomendación a nivel de documento, lo constituye Sentence-BERT (Reimers y Gurevych, 2019), una adaptación de BERT diseñada específicamente para producir embeddings de oraciones o párrafos completos optimizados para tareas de similitud.
+
+La métrica habitual para medir la cercanía entre dos embeddings es la **similitud coseno**, que se define como el coseno del ángulo formado por los dos vectores en el espacio. Sus valores oscilan entre $-1$ y $+1$, donde $+1$ indica vectores idénticos en dirección, $0$ indica vectores ortogonales y $-1$ indica vectores opuestos. La similitud coseno presenta dos ventajas prácticas frente a otras métricas como la distancia euclídea: por un lado, es invariante a la magnitud del vector, lo que evita que textos de longitud distinta produzcan distancias artificialmente grandes; por otro, es computacionalmente eficiente, especialmente cuando los vectores se almacenan ya normalizados.
+
+Para que el sistema de recomendación funcione en tiempo razonable cuando el catálogo crece, no basta con almacenar los embeddings y calcular la similitud frente a cada elemento del catálogo de forma exhaustiva. Es necesario emplear estructuras de datos especializadas que permitan resolver consultas de tipo *k-nearest neighbors* (k-NN) en tiempo sublineal. En el contexto del presente proyecto, esta funcionalidad se aporta mediante la extensión **pgvector** para PostgreSQL, que añade al sistema gestor de bases de datos un tipo de datos `vector` junto con operadores de distancia e índices especializados (IVFFlat y HNSW). El uso de pgvector permite mantener los embeddings dentro de la misma base de datos relacional que contiene el resto de la información del sistema, evitando la introducción de una base de datos adicional especializada en vectores y simplificando significativamente la arquitectura del sistema.
+
+### 5.4. Aprendizaje supervisado y predicción de valoraciones
+
+Más allá del sistema de recomendación, el proyecto incorpora un segundo componente de aprendizaje automático: un modelo de regresión capaz de estimar la valoración media (`vote_average`) que recibirá una película a partir de atributos disponibles con anterioridad a su estreno. Esta tarea pertenece al ámbito del **aprendizaje supervisado**, en concreto al subdominio de la **regresión**, donde el objetivo es predecir un valor numérico continuo a partir de un conjunto de variables de entrada.
+
+La metodología estándar en este tipo de tareas consiste en dividir el dataset disponible en al menos dos subconjuntos (entrenamiento y prueba), entrenar el modelo sobre el primero y reportar las métricas obtenidas sobre el segundo, garantizando así que las métricas reflejen la capacidad de generalización del modelo sobre datos no vistos durante el entrenamiento. Las métricas habituales para regresión incluyen el error absoluto medio (MAE), el error cuadrático medio (MSE) y su raíz (RMSE), y el coeficiente de determinación ($R^2$), que mide la proporción de varianza explicada por el modelo.
+
+Entre las familias de modelos aplicables a este tipo de problemas, el presente proyecto adopta los **modelos basados en árboles**, concretamente Random Forest y opcionalmente XGBoost. Esta elección se justifica por tres razones. Primera, los modelos basados en árboles manejan de forma natural conjuntos de features heterogéneos que incluyen variables numéricas, categóricas codificadas y binarias, sin requerir escalado ni preprocesamiento complejo. Segunda, son notablemente robustos frente a valores ausentes y atípicos, ambos abundantes en el dataset empleado. Tercera, producen una métrica de importancia de features de fácil interpretación, lo que enriquece la discusión de resultados.
+
+La literatura especializada en predicción cinematográfica reporta consistentemente que la predicción de variables relacionadas con el éxito comercial o crítico de una película es un problema notablemente difícil, dado que una proporción significativa de la varianza observada en estas variables se explica por factores que no están presentes en los metadatos del dataset: la campaña de marketing posterior, la recepción crítica, el contexto competitivo de la fecha de estreno y factores culturales contemporáneos. Las métricas reportadas en el presente proyecto se deben interpretar dentro de este contexto.
+
+### 5.5. Referencias bibliográficas seleccionadas
+
+A continuación se relacionan, ordenadas por tema, las referencias bibliográficas principales sobre las que se apoya el marco teórico del proyecto. El listado completo de referencias se recoge en el apartado **9. Bibliografía** de la presente memoria.
+
+**Sobre sistemas de recomendación:** Ricci, Rokach y Shapira (eds.), *Recommender Systems Handbook*, Springer (varias ediciones); trabajos clásicos sobre filtrado colaborativo basado en factorización matricial de Koren, Bell y Volinsky.
+
+**Sobre embeddings y procesamiento del lenguaje natural:** Mikolov et al. (2013) sobre Word2Vec; Vaswani et al. (2017) sobre la arquitectura Transformer; Devlin et al. (2018) sobre BERT; Reimers y Gurevych (2019) sobre Sentence-BERT.
+
+**Sobre aprendizaje automático general:** Géron, *Hands-On Machine Learning with Scikit-Learn, Keras and TensorFlow*, O'Reilly Media.
+
+**Sobre las tecnologías empleadas:** documentación oficial de Kotlin, Ktor, Compose Multiplatform, PostgreSQL y pgvector, accesible en los respectivos sitios web oficiales de cada proyecto.
+
+---
+
+## Tecnologías empleadas
+
+> *Esta sección se integrará dentro del apartado 7. Desarrollo de la memoria, como subsección previa a la descripción de la implementación de cada componente.*
+
+La selección del conjunto de tecnologías empleadas en el proyecto responde a tres criterios combinados: la **idoneidad técnica** de cada herramienta para el problema concreto que debe resolver, la **continuidad** respecto a las competencias adquiridas durante el periodo de prácticas curriculares (lo que reduce la curva de aprendizaje y permite concentrar el esfuerzo en los aspectos verdaderamente novedosos del proyecto), y la **vigencia** de cada herramienta en el ecosistema profesional actual, garantizando que las competencias aplicadas tengan valor más allá del contexto académico.
+
+### Pipeline de datos: Python 3.12
+
+El pipeline de limpieza, transformación y análisis del dataset se implementa en **Python**, versión 3.12. La elección de Python para esta capa del proyecto responde a la práctica establecida en el sector: el ecosistema de análisis de datos en Python (pandas, NumPy, scikit-learn, matplotlib, sentence-transformers) carece de equivalente directo en otros lenguajes en términos de madurez y de comunidad. Aunque el resto del proyecto se desarrolla principalmente en Kotlin, el uso de Python en la capa de datos se considera la elección estándar, no una incoherencia.
+
+La gestión del entorno virtual y de las dependencias se realiza mediante **uv**, una herramienta moderna desarrollada por Astral que reemplaza a las combinaciones tradicionales de `pip` + `venv` + `pip-tools`. Su elección se justifica por su velocidad notablemente superior, su garantía de reproducibilidad mediante un fichero de bloqueo (`uv.lock`) y su compatibilidad con el estándar `pyproject.toml` actual.
+
+### Sistema gestor de base de datos: PostgreSQL 16 con pgvector
+
+Para la persistencia se selecciona **PostgreSQL** en su versión 16, complementada con la extensión **pgvector**. PostgreSQL es un sistema gestor de bases de datos relacional, libre y de código abierto, con una madurez contrastada en entornos profesionales. Su elección frente a alternativas se justifica por tres razones.
+
+Primero, el dominio del proyecto (películas, personas, géneros, compañías productoras, relaciones cast/crew) se modela de forma natural en un esquema relacional con varias tablas y relaciones bien definidas. Una base de datos documental como MongoDB obligaría a anidar información o a denormalizar el modelo, perdiendo capacidades de consulta y de integridad referencial.
+
+Segundo, la extensión **pgvector** permite almacenar y consultar embeddings semánticos dentro de la propia base de datos relacional, eliminando la necesidad de incorporar una base de datos vectorial especializada (como Pinecone, Weaviate o Qdrant) como componente adicional del sistema. Esto simplifica significativamente la arquitectura del proyecto y reduce el número de tecnologías a configurar, desplegar y mantener.
+
+Tercero, PostgreSQL es exactamente el sistema gestor empleado durante el periodo de prácticas curriculares, lo que permite reaprovechar la familiaridad ya adquirida con su sintaxis avanzada, su sistema de migraciones SQL versionadas y sus capacidades de indexación.
+
+### Orquestación de contenedores: Podman
+
+Para la ejecución de PostgreSQL en entorno local se emplea **Podman** en su modo *rootless*, alternativa a Docker desarrollada por Red Hat. La elección frente a Docker se justifica por su menor consumo de recursos al no requerir un demonio en segundo plano, por su modelo de seguridad más restrictivo basado en *namespaces* de usuario, y por estar plenamente disponible en los repositorios oficiales de Debian sin necesidad de añadir repositorios externos. La compatibilidad de Podman con la sintaxis estándar de `docker-compose.yml` permite que la configuración del proyecto sea ejecutable también con Docker, sin modificaciones, en máquinas que prefieran emplear esa alternativa.
+
+### Backend: Kotlin con framework Ktor
+
+El servidor backend se desarrolla en **Kotlin** con el framework **Ktor**. Kotlin es un lenguaje moderno de tipado estático desarrollado por JetBrains, plenamente interoperable con la máquina virtual de Java (JVM) y oficialmente adoptado como lenguaje preferente para el desarrollo Android desde 2017. Sus principales virtudes técnicas son la verbosidad reducida frente a Java, el sistema robusto de seguridad frente a referencias nulas, y el soporte de primera clase a la programación asíncrona mediante corrutinas.
+
+Ktor es el framework de aplicaciones web oficial de Kotlin, mantenido por JetBrains. Frente a alternativas más maduras como Spring Boot, Ktor presenta dos ventajas para el contexto del proyecto: una huella significativamente más liviana, lo que reduce el tiempo de arranque y el consumo de recursos, y un modelo de configuración explícito basado en composición de plugins, que permite incluir exclusivamente las funcionalidades necesarias y entender con facilidad qué está activo en el servidor.
+
+Se valoró brevemente la posibilidad de emplear FastAPI (Python) o Express (Node.js) para esta capa. Se descartaron ambos por preferirse la coherencia tecnológica con el frontend (que debe estar escrito necesariamente en Kotlin para emplear Compose Multiplatform) y por mantener la continuidad respecto al stack manejado durante las prácticas curriculares.
+
+### Frontend: Kotlin Compose Multiplatform compilado a JavaScript
+
+La aplicación web cliente se desarrolla en **Compose Multiplatform**, el framework de interfaz de usuario declarativo desarrollado por JetBrains para Kotlin, compilando específicamente al *target* de JavaScript. Compose Multiplatform constituye una alternativa relativamente reciente a frameworks JavaScript establecidos como React, Vue o Angular.
+
+La principal motivación para emplear Compose Multiplatform en lugar de un framework JavaScript clásico es la **coherencia del stack**: todo el código del proyecto (excepto el pipeline de datos en Python) se escribe en un único lenguaje, Kotlin. El módulo compartido `shared` permite definir modelos de datos serializables que se emplean tanto en el backend como en el frontend, eliminando la necesidad de duplicar definiciones de tipos o de mantener archivos auxiliares como esquemas OpenAPI.
+
+Se reconoce explícitamente que Compose Multiplatform es una tecnología más joven y con un ecosistema de componentes menos abundante que React. Para un proyecto en producción con alto volumen de pantallas se podría reevaluar esta elección; para el alcance acotado del presente proyecto, las ventajas de coherencia priman sobre las desventajas de madurez relativa.
+
+### Modelos de aprendizaje automático: scikit-learn y sentence-transformers
+
+Para el componente de aprendizaje automático supervisado se emplea **scikit-learn**, biblioteca de referencia en el ecosistema Python para tareas clásicas de regresión y clasificación. Su API homogénea (`fit`, `predict`, `score`) y su excelente documentación la convierten en la opción estándar para problemas donde no es necesario recurrir a aprendizaje profundo.
+
+Para la generación de embeddings semánticos se emplea **sentence-transformers**, una biblioteca que ofrece modelos preentrenados optimizados para producir embeddings de oraciones de calidad. Concretamente, se prevé emplear el modelo `all-MiniLM-L6-v2`, que ofrece un balance favorable entre calidad de los embeddings producidos, dimensión del vector resultante (384) y tiempo de inferencia en CPU. La elección de un modelo ejecutable en CPU se justifica por la limitación de recursos del entorno de desarrollo, donde no se dispone de aceleración por GPU.
+
+### Herramientas auxiliares
+
+El proyecto se gestiona con **Gradle** como sistema de construcción para los módulos Kotlin, **Git** como sistema de control de versiones con repositorio remoto en GitHub, y **JetBrains IntelliJ IDEA Ultimate** como entorno integrado de desarrollo. La memoria se redacta inicialmente en formato Markdown y se exporta a PDF cumpliendo el formato exigido por la guía oficial del centro.

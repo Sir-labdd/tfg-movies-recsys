@@ -1,30 +1,30 @@
-# TFG — Plataforma de análisis y recomendación de películas
+# TFG — Movie analysis and recommendation platform
 
-Trabajo de Fin de Ciclo (CFGS DAM) — Curso 2025/2026
+Final project (CFGS DAM) — Academic year 2025/2026
 
-Plataforma web para el análisis exploratorio y la recomendación personalizada
-de películas mediante aprendizaje automático y embeddings semánticos.
+Web platform for exploratory analysis and personalized recommendation
+of movies using machine learning and semantic embeddings.
 
 ## Stack
 
-- **Base de datos:** PostgreSQL 16 + pgvector
+- **Database:** PostgreSQL 16 + pgvector
 - **Backend:** Kotlin + Ktor
-- **Frontend:** Kotlin Compose Multiplatform (target JS)
-- **Pipeline de datos:** Python 3.12 + pandas + scikit-learn + sentence-transformers
+- **Frontend:** Kotlin Compose Multiplatform (JS target)
+- **Data pipeline:** Python 3.12 + pandas + scikit-learn + sentence-transformers
 
-## Estructura
+## Structure
 
 \`\`\`
 .
-├── data/              # Datos (no versionados, ver instrucciones de descarga)
-├── python/            # Pipeline de limpieza, transformación y ML
-├── server/            # Backend Kotlin/Ktor
-├── composeApp/        # Frontend Compose Multiplatform JS
-├── shared/            # Modelos compartidos entre backend y frontend
-├── migrations/        # Migraciones SQL versionadas
-└── docs/              # Memoria y figuras
+├── data/              # Datasets (not versioned, see download instructions)
+├── python/            # Cleaning, transformation and ML pipeline
+├── server/            # Kotlin/Ktor backend
+├── composeApp/        # Compose Multiplatform JS frontend
+├── shared/            # Shared models between backend and frontend
+├── migrations/        # Versioned SQL migrations
+└── docs/              # Memoir and figures
 \`\`\`
 
-## Reproducir el proyecto
+## Reproducing the project
 
-(Se completará conforme avance el desarrollo.)
+(To be completed as development progresses.)
