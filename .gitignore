@@ -1,0 +1,29 @@
+# Datos (nunca subir a Git, ocupan mucho)
+data/raw/
+data/processed/
+data/exports/
+
+# Entorno virtual de Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Configuración local con secretos
+.env
+.env.local
+
+# Builds y caches de Gradle/Kotlin
+.gradle/
+build/
+out/
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
