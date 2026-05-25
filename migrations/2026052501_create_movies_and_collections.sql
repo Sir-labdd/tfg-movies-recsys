@@ -84,7 +84,23 @@ CREATE INDEX idx_movies_original_language ON movies (original_language);
 CREATE INDEX idx_movies_collection_id ON movies (collection_id)
     WHERE collection_id IS NOT NULL;
 
+-- ----------------------------------------------------------------------------
+-- Helper: IMMUTABLE wrapper for unaccent (required for functional indexes).
+-- PostgreSQL refuses to use the bare unaccent() in functional indexes because
+-- it is declared STABLE, not IMMUTABLE. Wrapping it in a SQL function marked
+-- IMMUTABLE is the standard workaround documented by the unaccent maintainers.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION immutable_unaccent(text)
+    RETURNS text
+    LANGUAGE sql
+    IMMUTABLE
+    PARALLEL SAFE
+    STRICT
+AS $$
+SELECT public.unaccent('public.unaccent', $1);
+$$;
+
 -- Index for case-insensitive, accent-insensitive title search.
--- Built on the unaccent extension installed in migration 2026052500.
-CREATE INDEX idx_movies_title_lower_unaccent
-    ON movies (lower(unaccent(title)));
+-- Built on the immutable_unaccent wrapper defined above.
+CREATE INDEX IF NOT EXISTS idx_movies_title_lower_unaccent
+    ON movies (lower(immutable_unaccent(title)));
