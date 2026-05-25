@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: docker.io/pgvector/pgvector:pg16
+    container_name: tfg-movies-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tfg_movies
+      POSTGRES_USER: tfg_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-tfg_local_dev}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tfg_user -d tfg_movies"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
