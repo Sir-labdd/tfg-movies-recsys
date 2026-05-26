@@ -13,6 +13,10 @@ application {
 }
 
 dependencies {
+
+    // ---- Shared module (DTOs) ----
+    implementation(project(":shared"))
+
     // ---- Ktor server ----
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-netty")

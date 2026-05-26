@@ -10,5 +10,5 @@ rootProject.name = "tfg-movies-recsys"
 include(":server")
 
 // Future modules — uncomment as they get created:
-// include(":shared")
+include(":shared")
 // include(":composeApp")
