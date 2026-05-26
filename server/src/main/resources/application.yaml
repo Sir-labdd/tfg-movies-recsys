@@ -1,0 +1,12 @@
+ktor:
+  application:
+    modules:
+      - com.tfg.movies.server.ApplicationKt.module
+  deployment:
+    port: 8080
+    host: 0.0.0.0
+
+# Application-specific configuration. Read by our code, not by Ktor itself.
+database:
+  url: ${DATABASE_URL}
+  poolSize: 10
