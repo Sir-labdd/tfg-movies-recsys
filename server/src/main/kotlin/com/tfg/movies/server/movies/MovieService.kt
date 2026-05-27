@@ -44,6 +44,41 @@ class MovieService(
         return repository.findAll(effectiveFilters, sort, pagination)
     }
 
+    /**
+     * Searches movies by title. Validates the query string and
+     * delegates to the repository.
+     *
+     * @throws ValidationException if the query is too short, too long,
+     *         or the pagination parameters are out of bounds.
+     */
+    fun search(
+        query: String,
+        page: Int,
+        pageSize: Int,
+    ): MovieRepository.PagedResult {
+        validateSearchQuery(query)
+        validatePagination(page, pageSize)
+
+        val pagination = MovieRepository.Pagination(page = page, pageSize = pageSize)
+        return repository.searchByTitle(query.trim(), pagination)
+    }
+
+    private fun validateSearchQuery(query: String) {
+        val trimmed = query.trim()
+        if (trimmed.length < MIN_SEARCH_QUERY_LENGTH) {
+            throw ValidationException(
+                code = "invalid_search_query",
+                message = "Search query must be at least $MIN_SEARCH_QUERY_LENGTH characters",
+            )
+        }
+        if (trimmed.length > MAX_SEARCH_QUERY_LENGTH) {
+            throw ValidationException(
+                code = "invalid_search_query",
+                message = "Search query must be at most $MAX_SEARCH_QUERY_LENGTH characters",
+            )
+        }
+    }
+
     // ---------- validations ----------
 
     private fun validatePagination(page: Int, pageSize: Int) {
@@ -108,6 +143,9 @@ class MovieService(
          * filters out statistical noise (movies with very few votes).
          */
         const val DEFAULT_MIN_VOTE_COUNT_FOR_RATING_SORT = 10
+        const val MIN_SEARCH_QUERY_LENGTH = 2
+        const val MAX_SEARCH_QUERY_LENGTH = 100
+
     }
 }
 

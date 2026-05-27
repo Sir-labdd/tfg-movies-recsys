@@ -160,6 +160,103 @@ class MovieRepository {
         }
     }
 
+    fun searchByTitle(
+        query: String,
+        pagination: Pagination,
+    ): PagedResult {
+        // Same pattern transformations as before for the LIKE wildcards
+        val pattern = "%$query%"
+        val patternStart = "$query%"
+
+        // Helper SQL fragment applied to both the column and the query
+        // value. Lowercases, removes accents, and treats hyphens as
+        // spaces so "spider man" matches "Spider-Man".
+        val titleNorm = "replace(lower(immutable_unaccent(m.title)), '-', ' ')"
+        val origNorm  = "replace(lower(immutable_unaccent(m.original_title)), '-', ' ')"
+        val queryNorm = "replace(lower(immutable_unaccent(?)), '-', ' ')"
+
+        val listSql = """
+            SELECT
+                m.id,
+                m.title,
+                m.poster_path,
+                m.popularity,
+                m.vote_average,
+                m.vote_count,
+                EXTRACT(YEAR FROM m.release_date)::INT AS year,
+                COALESCE(
+                    (SELECT ARRAY_AGG(g.name ORDER BY g.name)
+                     FROM movie_genres mg
+                     JOIN genres g ON g.id = mg.genre_id
+                     WHERE mg.movie_id = m.id),
+                    ARRAY[]::TEXT[]
+                ) AS genres,
+                CASE
+                    WHEN $titleNorm = $queryNorm THEN 100
+                    WHEN $titleNorm LIKE $queryNorm THEN 50
+                    WHEN $titleNorm LIKE $queryNorm THEN 10
+                    WHEN $origNorm  LIKE $queryNorm THEN 5
+                    ELSE 0
+                END AS relevance_score
+            FROM movies m
+            WHERE
+                $titleNorm LIKE $queryNorm
+                OR $origNorm LIKE $queryNorm
+            ORDER BY relevance_score DESC, m.popularity DESC NULLS LAST, m.id ASC
+            LIMIT ? OFFSET ?
+        """.trimIndent()
+
+        val countSql = """
+            SELECT COUNT(*) AS total
+            FROM movies m
+            WHERE
+                $titleNorm LIKE $queryNorm
+                OR $origNorm LIKE $queryNorm
+        """.trimIndent()
+
+        DatabaseFactory.dataSource.connection.use { conn ->
+            // Count: 2 query params (one per WHERE clause)
+            val total = conn.prepareStatement(countSql).use { stmt ->
+                stmt.setString(1, pattern)
+                stmt.setString(2, pattern)
+                stmt.executeQuery().use { rs ->
+                    if (rs.next()) rs.getLong("total") else 0L
+                }
+            }
+
+            // List: 6 query params for the SELECT (4 in CASE + 2 in WHERE)
+            //       + 2 for LIMIT/OFFSET
+            // Param positions:
+            //   1: exact match (CASE)        -> query (no wildcards)
+            //   2: starts-with (CASE)        -> patternStart
+            //   3: title contains (CASE)     -> pattern
+            //   4: original contains (CASE)  -> pattern
+            //   5: WHERE title               -> pattern
+            //   6: WHERE original            -> pattern
+            //   7: LIMIT
+            //   8: OFFSET
+            val items = conn.prepareStatement(listSql).use { stmt ->
+                stmt.setString(1, query)
+                stmt.setString(2, patternStart)
+                stmt.setString(3, pattern)
+                stmt.setString(4, pattern)
+                stmt.setString(5, pattern)
+                stmt.setString(6, pattern)
+                stmt.setInt(7, pagination.pageSize)
+                stmt.setInt(8, pagination.offset)
+                stmt.executeQuery().use { rs ->
+                    val results = mutableListOf<MovieSummary>()
+                    while (rs.next()) {
+                        results.add(mapRowToMovieSummary(rs))
+                    }
+                    results
+                }
+            }
+
+            return PagedResult(items = items, total = total)
+        }
+    }
+
     // ---------- private helpers: WHERE/ORDER BY/binding ----------
 
     /**

@@ -86,6 +86,52 @@ fun Route.movieRoutes(service: MovieService) {
             }
         }
 
+        // GET /movies/search?q=...
+        get("/search") {
+            try {
+                val q = call.parameters["q"]
+                if (q.isNullOrBlank()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ErrorResponse(
+                            error = "missing_query",
+                            message = "Query parameter 'q' is required",
+                        ),
+                    )
+                    return@get
+                }
+
+                val page = call.parseIntQuery("page", default = 1)
+                val pageSize = call.parseIntQuery("pageSize", default = 20)
+
+                val result = service.search(
+                    query = q,
+                    page = page,
+                    pageSize = pageSize,
+                )
+
+                val totalPages = if (result.total == 0L) 0L
+                else ceil(result.total.toDouble() / pageSize).toLong()
+
+                val response = PaginatedResponse(
+                    items = result.items,
+                    page = page,
+                    pageSize = pageSize,
+                    total = result.total,
+                    totalPages = totalPages,
+                )
+                call.respond(HttpStatusCode.OK, response)
+
+            } catch (e: BadQueryParamException) {
+                call.respond(HttpStatusCode.BadRequest, e.toResponse())
+            } catch (e: ValidationException) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(error = e.code, message = e.message ?: "validation failed"),
+                )
+            }
+        }
+
         // GET /movies/{id} — full detail of one movie
         get("/{id}") {
             val idParam = call.parameters["id"]
