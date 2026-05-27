@@ -36,6 +36,7 @@ dependencies {
 
     // ---- Tests ----
     testImplementation("io.ktor:ktor-server-test-host")
+    testImplementation("io.ktor:ktor-client-content-negotiation")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 
