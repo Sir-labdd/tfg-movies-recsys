@@ -16,6 +16,12 @@ kotlinxSerialization = "1.8.0"
 # --- Logging ---
 logback = "1.5.12"
 
+# --- Compose Multiplatform (frontend) ---
+composeMultiplatform = "1.10.0"
+
+# --- Kotlin coroutines ---
+kotlinxCoroutines = "1.10.2"
+
 [libraries]
 # --- Server-side Ktor ---
 ktor-server-core               = { module = "io.ktor:ktor-server-core",                version.ref = "ktor" }
@@ -41,9 +47,24 @@ hikari      = { module = "com.zaxxer:HikariCP",        version.ref = "hikari" }
 # --- Logging ---
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
+# --- Compose HTML (frontend, browser DOM) ---
+# --- Compose HTML (frontend, browser DOM) ---
+compose-runtime         = { module = "org.jetbrains.compose.runtime:runtime",       version.ref = "composeMultiplatform" }
+compose-html-core       = { module = "org.jetbrains.compose.html:html-core",        version.ref = "composeMultiplatform" }
+# --- Ktor client (frontend HTTP client) ---
+ktor-client-core              = { module = "io.ktor:ktor-client-core",              version.ref = "ktor" }
+ktor-client-js                = { module = "io.ktor:ktor-client-js",                version.ref = "ktor" }
+# ktor-client-content-negotiation already declared in the test dependencies block.
+# It is reused by :composeApp; no new entry needed.
+
+# --- Coroutines for the JS target ---
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+
 [plugins]
 kotlin-jvm           = { id = "org.jetbrains.kotlin.jvm",           version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktor                 = { id = "io.ktor.plugin",                    version.ref = "ktor" }
 foojay-resolver      = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "foojay" }
+compose-multiplatform = { id = "org.jetbrains.compose",                version.ref = "composeMultiplatform" }
+compose-compiler      = { id = "org.jetbrains.kotlin.plugin.compose",  version.ref = "kotlin" }
