@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import com.tfg.movies.client.api.ApiException
 import com.tfg.movies.client.api.MovieApi
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.H1
@@ -16,14 +17,6 @@ import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 
-/**
- * Entry point of the web client.
- *
- * The Compose Multiplatform plugin invokes this main() at module load
- * time. It locates the DOM element with id="root" (declared in
- * src/jsMain/resources/index.html) and renders the Compose tree below
- * it.
- */
 fun main() {
     renderComposable(rootElementId = "root") {
         App()
@@ -32,16 +25,16 @@ fun main() {
 
 @Composable
 fun App() {
+    // Inject the application's design system (CSS custom properties
+    // and base resets). Style{} renders a <style> tag whose content
+    // is the result of compiling AppStyle's StyleSheet to CSS text.
+    Style(AppStyle)
+
     H1 { Text("TFG Movies — Recomendador") }
     P { Text("Hello World. Frontend up and running.") }
 
-    // ----------------------------------------------------------------
-    // Temporary API smoke test for sub-step B7.3.
-    //
-    // This block exercises the MovieApi end-to-end against the running
-    // backend, displaying the result inline. It will be removed once
-    // the proper movie listing screen is implemented in B7.4.
-    // ----------------------------------------------------------------
+    // Temporary API smoke test from B7.3, kept until B7.4 introduces
+    // the real movie listing screen.
     ApiSmokeTest()
 }
 
@@ -54,6 +47,7 @@ fun ApiSmokeTest() {
     Div {
         Button(
             attrs = {
+                classes("btn-primary")
                 if (loading) {
                     attr("disabled", "true")
                 }
