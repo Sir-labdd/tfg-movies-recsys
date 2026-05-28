@@ -16,7 +16,11 @@ import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
-
+import com.tfg.movies.client.components.MovieCardStyles
+import com.tfg.movies.client.components.MovieCard
+import com.tfg.movies.shared.movies.MovieSummary
+import org.jetbrains.compose.web.css.px
+import org.jetbrains.compose.web.css.width
 fun main() {
     renderComposable(rootElementId = "root") {
         App()
@@ -29,13 +33,29 @@ fun App() {
     // and base resets). Style{} renders a <style> tag whose content
     // is the result of compiling AppStyle's StyleSheet to CSS text.
     Style(AppStyle)
-
+    Style(MovieCardStyles)
     H1 { Text("TFG Movies — Recomendador") }
     P { Text("Hello World. Frontend up and running.") }
 
     // Temporary API smoke test from B7.3, kept until B7.4 introduces
     // the real movie listing screen.
     ApiSmokeTest()
+
+    // Temporary: render a single MovieCard with mock data to validate
+    // the component visually before integrating with the API in B7.4.4.
+    val mockMovie = MovieSummary(
+        id = 550,
+        title = "Fight Club",
+        year = 1999,
+        posterPath = "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+        voteAverage = 8.4,
+        voteCount = 27543,
+        popularity = 70.5,
+        genres = listOf("Drama", "Thriller"),
+    )
+    Div(attrs = { style { width(220.px) } }) {
+        MovieCard(mockMovie)
+    }
 }
 
 @Composable
