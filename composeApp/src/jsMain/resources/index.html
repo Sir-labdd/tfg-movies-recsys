@@ -13,6 +13,18 @@
 <body>
 <div id="root"></div>
 
+<!--
+        Optional override of the backend URL. Uncomment and adjust the
+        following block in production environments where the backend
+        lives at a different origin than the development localhost:8080.
+        ApiConfig reads window.API_BASE_URL with a fallback to the
+        localhost default.
+-->
+<!--
+<script>
+    window.API_BASE_URL = "https://api.production.example.com";
+</script>
+    -->
 <script src="composeApp.js"></script>
 </body>
 </html>
