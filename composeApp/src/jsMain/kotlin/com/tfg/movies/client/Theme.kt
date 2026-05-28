@@ -45,8 +45,8 @@ object AppStyle : StyleSheet() {
 
             // Accent — amber, used sparingly on interactive elements
             // and key highlights. Avoids the Netflix-red cliché.
-            property("--accent", "#f5a524")
-            property("--accent-hover", "#fcb84d")
+            property("--accent", "#a78bfa")
+            property("--accent-hover", "#c4b5fd")
 
             // Borders and shadows — subtle separators between surfaces.
             property("--border", "#30363d")
