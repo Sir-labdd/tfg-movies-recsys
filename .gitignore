@@ -31,3 +31,5 @@ Thumbs.db
 
 # uv: lock file is versioned, venv is not
 .python-version
+# Kotlin/JS build artifacts (yarn.lock managed by Webpack)
+kotlin-js-store/
