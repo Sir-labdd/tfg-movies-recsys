@@ -79,6 +79,36 @@ class MovieService(
         }
     }
 
+    /**
+     * Returns the list of movies most similar to the reference movie.
+     *
+     * @throws ValidationException if limit is out of bounds.
+     * @return null if the reference movie has no embedding (route maps to 404).
+     */
+    fun findSimilar(
+        referenceId: Int,
+        limit: Int,
+        minVoteCount: Int? = null,
+    ): List<Pair<com.tfg.movies.shared.movies.MovieSummary, Double>>? {
+        validateSimilarLimit(limit)
+        if (minVoteCount != null && minVoteCount < 0) {
+            throw ValidationException(
+                code = "invalid_min_vote_count",
+                message = "minVoteCount cannot be negative, got: $minVoteCount",
+            )
+        }
+        return repository.findSimilarTo(referenceId, limit, minVoteCount)
+    }
+
+    private fun validateSimilarLimit(limit: Int) {
+        if (limit < 1 || limit > MAX_SIMILAR_LIMIT) {
+            throw ValidationException(
+                code = "invalid_limit",
+                message = "limit must be between 1 and $MAX_SIMILAR_LIMIT, got: $limit",
+            )
+        }
+    }
+
     // ---------- validations ----------
 
     private fun validatePagination(page: Int, pageSize: Int) {
@@ -145,6 +175,9 @@ class MovieService(
         const val DEFAULT_MIN_VOTE_COUNT_FOR_RATING_SORT = 10
         const val MIN_SEARCH_QUERY_LENGTH = 2
         const val MAX_SEARCH_QUERY_LENGTH = 100
+
+        const val MAX_SIMILAR_LIMIT = 50
+        const val DEFAULT_SIMILAR_LIMIT = 10
 
     }
 }

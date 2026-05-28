@@ -12,7 +12,8 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlin.math.ceil
-
+import com.tfg.movies.shared.movies.SimilarMovieItem
+import com.tfg.movies.shared.movies.SimilarMoviesResponse
 /**
  * HTTP routes for movies.
  *
@@ -121,6 +122,57 @@ fun Route.movieRoutes(service: MovieService) {
                     totalPages = totalPages,
                 )
                 call.respond(HttpStatusCode.OK, response)
+
+            } catch (e: BadQueryParamException) {
+                call.respond(HttpStatusCode.BadRequest, e.toResponse())
+            } catch (e: ValidationException) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(error = e.code, message = e.message ?: "validation failed"),
+                )
+            }
+        }
+
+        // GET /movies/{id}/similar
+        get("/{id}/similar") {
+            try {
+                val idParam = call.parameters["id"]
+                val id = idParam?.toIntOrNull()
+
+                if (id == null) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ErrorResponse(
+                            error = "invalid_id",
+                            message = "Path parameter 'id' must be an integer, got: $idParam",
+                        ),
+                    )
+                    return@get
+                }
+
+                val limit = call.parseIntQuery("limit", default = MovieService.DEFAULT_SIMILAR_LIMIT)
+                val minVoteCount = call.parseIntQueryOrNull("minVoteCount")
+
+                val results = service.findSimilar(id, limit, minVoteCount)
+                if (results == null) {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        ErrorResponse(
+                            error = "movie_not_found",
+                            message = "No movie with id $id has an embedding " +
+                                    "(either it does not exist or its overview is too short).",
+                        ),
+                    )
+                    return@get
+                }
+
+                val items = results.map { (summary, similarity) ->
+                    SimilarMovieItem(movie = summary, similarity = similarity)
+                }
+                call.respond(
+                    HttpStatusCode.OK,
+                    SimilarMoviesResponse(movieId = id, items = items),
+                )
 
             } catch (e: BadQueryParamException) {
                 call.respond(HttpStatusCode.BadRequest, e.toResponse())

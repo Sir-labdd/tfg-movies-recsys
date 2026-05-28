@@ -7,6 +7,9 @@ dependencies = [
     "pandas>=2.2",
     "numpy>=2.1",
     "psycopg[binary]>=3.3.4",
+    "sentence-transformers>=3.0",
+    "tqdm>=4.66",
+    "pgvector>=0.3",
 ]
 
 [build-system]

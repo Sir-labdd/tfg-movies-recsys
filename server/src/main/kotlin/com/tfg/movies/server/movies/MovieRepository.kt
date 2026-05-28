@@ -257,6 +257,102 @@ class MovieRepository {
         }
     }
 
+    /**
+     * Returns movies whose embedding is closest to that of the given
+     * reference movie, ordered by cosine similarity descending.
+     *
+     * Implementation detail: PostgreSQL's `<=>` operator computes
+     * cosine *distance* (0 = identical, 2 = opposite). The HNSW index
+     * built in migration 2026052701 accelerates this query so it runs
+     * in milliseconds even with tens of thousands of rows.
+     *
+     * The reference movie itself is excluded from the result (a movie
+     * is always perfectly similar to itself).
+     *
+     * Returns null if the reference movie has no embedding (movie does
+     * not exist, or its overview was too short to embed). The route
+     * layer translates this null into a 404 response.
+     *
+     * @param referenceId id of the movie whose neighbors we want
+     * @param limit       maximum number of neighbors to return
+     * @param minVoteCount optional filter to skip obscure films
+     */
+    fun findSimilarTo(
+        referenceId: Int,
+        limit: Int,
+        minVoteCount: Int? = null,
+    ): List<Pair<MovieSummary, Double>>? {
+
+        // Step 1: verify the reference movie has an embedding. We need
+        // this both to return 404 cleanly when it does not, and to
+        // pass the vector to the second query.
+        val checkSql = "SELECT 1 FROM movie_embeddings WHERE movie_id = ?"
+        val exists = DatabaseFactory.dataSource.connection.use { conn ->
+            conn.prepareStatement(checkSql).use { stmt ->
+                stmt.setInt(1, referenceId)
+                stmt.executeQuery().use { rs -> rs.next() }
+            }
+        }
+        if (!exists) return null
+
+        // Step 2: pull the K nearest neighbors. The reference embedding
+        // is fetched via a subquery rather than as a parameter, because
+        // pgvector's similarity operators expect a `vector` type and
+        // letting PostgreSQL handle it server-side avoids round-trip
+        // serialization of a 384-float array.
+        val voteCondition = if (minVoteCount != null) "AND m.vote_count >= ?" else ""
+
+        val sql = """
+            SELECT
+                m.id,
+                m.title,
+                m.poster_path,
+                m.popularity,
+                m.vote_average,
+                m.vote_count,
+                EXTRACT(YEAR FROM m.release_date)::INT AS year,
+                COALESCE(
+                    (SELECT ARRAY_AGG(g.name ORDER BY g.name)
+                     FROM movie_genres mg
+                     JOIN genres g ON g.id = mg.genre_id
+                     WHERE mg.movie_id = m.id),
+                    ARRAY[]::TEXT[]
+                ) AS genres,
+                (1 - (me.embedding <=> ref.embedding))::DOUBLE PRECISION AS similarity
+            FROM movie_embeddings me
+            JOIN movies m ON m.id = me.movie_id
+            CROSS JOIN (
+                SELECT embedding FROM movie_embeddings WHERE movie_id = ?
+            ) AS ref
+            WHERE me.movie_id != ?
+              $voteCondition
+            ORDER BY me.embedding <=> ref.embedding
+            LIMIT ?
+        """.trimIndent()
+
+        DatabaseFactory.dataSource.connection.use { conn ->
+            conn.prepareStatement(sql).use { stmt ->
+                var idx = 1
+                stmt.setInt(idx++, referenceId)  // for the CROSS JOIN subquery
+                stmt.setInt(idx++, referenceId)  // for the != filter
+                if (minVoteCount != null) {
+                    stmt.setInt(idx++, minVoteCount)
+                }
+                stmt.setInt(idx, limit)
+
+                stmt.executeQuery().use { rs ->
+                    val results = mutableListOf<Pair<MovieSummary, Double>>()
+                    while (rs.next()) {
+                        val summary = mapRowToMovieSummary(rs)
+                        val similarity = rs.getDouble("similarity")
+                        results.add(summary to similarity)
+                    }
+                    return results
+                }
+            }
+        }
+    }
+
     // ---------- private helpers: WHERE/ORDER BY/binding ----------
 
     /**
