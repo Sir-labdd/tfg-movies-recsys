@@ -36,17 +36,37 @@ fun MovieCard(movie: MovieSummary) {
         Div(attrs = { classes("movie-card-poster") }) {
             val posterPath = movie.posterPath
             if (posterPath != null) {
+                // Render both the image and the fallback. CSS hides the
+                // fallback by default. If the image fails to load (404,
+                // expired path, CDN error), the inline onerror handler
+                // hides the broken <img> and reveals the fallback sibling.
                 Img(
                     src = "${Constants.TMDB_IMAGE_BASE_URL}$posterPath",
                     alt = movie.title,
-                )
+                ) {
+                    attr(
+                        "onerror",
+                        "this.style.display='none';" +
+                                "this.nextElementSibling.style.display='flex';",
+                    )
+                }
+                // Hidden fallback — revealed by onerror above.
+                Div(attrs = {
+                    classes("movie-card-poster-fallback")
+                    style { property("display", "none") }
+                }) {
+                    Span(attrs = { classes("movie-card-poster-icon") }) {
+                        Text("\uD83C\uDFAC")
+                    }
+                    Span(attrs = { classes("movie-card-poster-fallback-title") }) {
+                        Text(movie.title)
+                    }
+                }
             } else {
-                // Fallback when the movie has no poster on TMDB.
-                // Plain centered icon + truncated title gives the
-                // grid a visually stable cell.
+                // No poster path at all — show fallback directly.
                 Div(attrs = { classes("movie-card-poster-fallback") }) {
                     Span(attrs = { classes("movie-card-poster-icon") }) {
-                        Text("🎬")
+                        Text("\uD83C\uDFAC")
                     }
                     Span(attrs = { classes("movie-card-poster-fallback-title") }) {
                         Text(movie.title)
