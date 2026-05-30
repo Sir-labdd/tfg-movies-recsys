@@ -29,8 +29,11 @@ import org.jetbrains.compose.web.dom.Text
  * focused on the structure.
  */
 @Composable
-fun MovieCard(movie: MovieSummary) {
-    Div(attrs = { classes("movie-card") }) {
+fun MovieCard(movie: MovieSummary, onClick: (() -> Unit)? = null) {
+    Div(attrs = {
+        classes("movie-card")
+        onClick?.let { handler -> onClick { handler() } }
+    }) {
 
         // ---- Poster ----
         Div(attrs = { classes("movie-card-poster") }) {
