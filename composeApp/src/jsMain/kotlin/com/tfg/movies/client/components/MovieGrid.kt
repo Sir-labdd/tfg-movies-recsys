@@ -23,10 +23,16 @@ import org.jetbrains.compose.web.dom.Div
  * filters at the top).
  */
 @Composable
-fun MovieGrid(movies: List<MovieSummary>) {
+fun MovieGrid(
+    movies: List<MovieSummary>,
+    onMovieClick: ((MovieSummary) -> Unit)? = null,
+) {
     Div(attrs = { classes("movie-grid") }) {
         movies.forEach { movie ->
-            MovieCard(movie)
+            MovieCard(
+                movie = movie,
+                onClick = onMovieClick?.let { { it(movie) } },
+            )
         }
     }
 }

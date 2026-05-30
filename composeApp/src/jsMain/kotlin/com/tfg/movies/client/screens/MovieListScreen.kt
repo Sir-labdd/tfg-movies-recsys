@@ -22,7 +22,7 @@ import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.P
 import org.jetbrains.compose.web.dom.Text
-
+import com.tfg.movies.client.state.AppState
 /**
  * Main listing screen with filters and infinite scroll.
  *
@@ -177,7 +177,12 @@ fun MovieListScreen() {
         }
 
         else -> {
-            MovieGrid(movies)
+            MovieGrid(
+                movies = movies,
+                onMovieClick = { movie ->
+                    AppState.navigateTo("movie/${movie.id}")
+                },
+            )
 
             if (isLoadingMore) {
                 Div(attrs = { classes("movie-list-loading-more") }) {
