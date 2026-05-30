@@ -353,6 +353,25 @@ class MovieRepository {
         }
     }
 
+    /**
+     * Returns all genre names sorted alphabetically.
+     * Used by the frontend to populate the genre filter dropdown.
+     */
+    fun findAllGenreNames(): List<String> {
+        val sql = "SELECT name FROM genres ORDER BY name"
+        DatabaseFactory.dataSource.connection.use { conn ->
+            conn.prepareStatement(sql).use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    val names = mutableListOf<String>()
+                    while (rs.next()) {
+                        names.add(rs.getString("name"))
+                    }
+                    return names
+                }
+            }
+        }
+    }
+
     // ---------- private helpers: WHERE/ORDER BY/binding ----------
 
     /**
