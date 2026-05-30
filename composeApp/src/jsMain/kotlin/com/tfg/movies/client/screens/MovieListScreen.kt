@@ -270,5 +270,14 @@ object MovieListScreenStyles : StyleSheet() {
             property("background-color", "var(--accent-hover)")
             property("transform", "scale(1.1)")
         }
+
+        ".search-header" style {
+            property("padding", "var(--space-4) var(--space-4) 0")
+        }
+
+        ".search-header h2" style {
+            property("color", "var(--text-primary)")
+            property("font-size", "var(--font-size-xl)")
+        }
     }
 }
