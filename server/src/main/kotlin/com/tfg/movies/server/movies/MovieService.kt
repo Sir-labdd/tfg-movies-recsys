@@ -109,6 +109,11 @@ class MovieService(
         }
     }
 
+    /**
+     * Returns all available genre names for filter dropdowns.
+     */
+    fun getAllGenres(): List<String> = repository.findAllGenreNames()
+
     // ---------- validations ----------
 
     private fun validatePagination(page: Int, pageSize: Int) {

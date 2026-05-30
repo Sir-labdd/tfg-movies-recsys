@@ -26,6 +26,12 @@ import com.tfg.movies.shared.movies.SimilarMoviesResponse
  */
 fun Route.movieRoutes(service: MovieService) {
 
+    // GET /genres — all genre names for filter dropdowns.
+    get("/genres") {
+        call.respond(HttpStatusCode.OK, service.getAllGenres())
+    }
+
+
     route("/movies") {
 
         // GET /movies — paginated list with optional filters and sort

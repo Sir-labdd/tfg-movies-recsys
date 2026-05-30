@@ -9,6 +9,8 @@ import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.dom.H1
 import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
+import com.tfg.movies.client.components.MovieFiltersStyles
+
 fun main() {
     renderComposable(rootElementId = "root") {
         App()
@@ -24,6 +26,7 @@ fun App() {
     Style(MovieCardStyles)
     Style(MovieGridStyles)
     Style(MovieListScreenStyles)
+    Style(MovieFiltersStyles)
 
     H1 { Text("TFG Movies — Recomendador") }
 

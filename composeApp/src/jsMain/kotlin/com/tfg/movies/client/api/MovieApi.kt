@@ -106,6 +106,13 @@ object MovieApi {
         )
         return ApiClient.get("/movies/$id/similar$params")
     }
+
+    /**
+     * GET /genres — list of all genre names for filter dropdowns.
+     */
+    suspend fun getGenres(): Result<List<String>> {
+        return ApiClient.get("/genres")
+    }
 }
 
 /**
