@@ -12,6 +12,7 @@ import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.routing.*
+import io.ktor.server.http.content.staticResources
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
@@ -45,5 +46,12 @@ fun Application.module() {
     routing {
         healthRoutes()
         movieRoutes(movieService)
+
+        // Serve the production frontend bundle. Files are copied from
+        // :composeApp's webpack output into the "static" classpath
+        // directory by the copyFrontend Gradle task (see server/
+        // build.gradle.kts). Placed AFTER the API routes so they
+        // take priority over static file resolution.
+        staticResources("/", "static")
     }
 }

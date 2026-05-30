@@ -50,3 +50,34 @@ dependencies {
 kotlin {
     jvmToolchain(21)
 }
+
+// ============================================================================
+// Copy the production frontend bundle into the server's classpath so
+// Ktor can serve it as static files. The bundle lives under the
+// "static" resource directory, served at "/" by the static route.
+//
+// Task dependency chain:
+//   :composeApp:jsBrowserProductionWebpack  (build the JS bundle)
+//   → copyFrontend                          (copy to server resources)
+//   → :server:classes                       (include in classpath)
+//   → :server:run                           (start with frontend)
+// ============================================================================
+val copyFrontend by tasks.registering(Copy::class) {
+    dependsOn(":composeApp:jsBrowserProductionWebpack")
+    mustRunAfter(tasks.named("processResources"))
+
+    // JS bundles from webpack production output.
+    from(project(":composeApp").layout.buildDirectory.dir("kotlin-webpack/js/productionExecutable")) {
+        include("*.js", "*.js.map")
+    }
+    // index.html from processed resources.
+    from(project(":composeApp").layout.buildDirectory.dir("processedResources/js/main")) {
+        include("index.html")
+    }
+
+    into(layout.buildDirectory.dir("resources/main/static"))
+}
+
+tasks.named("classes") {
+    dependsOn(copyFrontend)
+}
