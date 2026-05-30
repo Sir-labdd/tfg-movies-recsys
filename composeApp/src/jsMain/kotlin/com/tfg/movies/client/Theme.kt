@@ -78,6 +78,26 @@ object AppStyle : StyleSheet() {
         }
 
         // ----------------------------------------------------------------
+        // Light theme overrides.
+        // Applied by adding class "light-theme" to <body>. All tokens
+        // that differ between dark and light are redeclared here; any
+        // token NOT listed inherits from :root (e.g. font sizes, spacing,
+        // radii stay the same in both themes).
+        // ----------------------------------------------------------------
+        ".light-theme" style {
+            property("--bg-primary", "#f6f8fa")
+            property("--bg-secondary", "#ffffff")
+            property("--bg-tertiary", "#e8eaed")
+            property("--text-primary", "#1f2328")
+            property("--text-secondary", "#636c76")
+            property("--text-muted", "#8b949e")
+            property("--accent", "#7c3aed")       // deeper purple for contrast on white
+            property("--accent-hover", "#6d28d9")
+            property("--border", "#d1d5db")
+            property("--shadow", "rgba(0, 0, 0, 0.08)")
+        }
+
+        // ----------------------------------------------------------------
         // Base resets.
         // Apply the design tokens to the html/body so the dark palette
         // takes effect immediately, before any Composable mounts.

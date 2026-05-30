@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.browser.window
-
+import kotlinx.browser.document
 /**
  * Application-wide navigation state.
  *
@@ -25,7 +25,58 @@ import kotlinx.browser.window
 object AppState {
 
     var currentRoute: String by mutableStateOf(initialRoute())
+    // ---- Theme ----
 
+    var isDarkTheme: Boolean by mutableStateOf(true)
+        private set
+
+    /**
+     * Toggle between dark and light themes.
+     * Persists the choice in localStorage and applies/removes the
+     * "light-theme" class on <body>.
+     */
+    fun toggleTheme() {
+        isDarkTheme = !isDarkTheme
+        applyThemeToBody()
+        try {
+            window.localStorage.setItem("theme", if (isDarkTheme) "dark" else "light")
+        } catch (_: Throwable) {
+            // localStorage may be unavailable in some contexts (e.g.
+            // incognito mode in some browsers). Ignore silently.
+        }
+    }
+
+    /**
+     * Call once on startup to read the persisted theme (or the OS
+     * preference if nothing is stored) and apply it.
+     */
+    fun initTheme() {
+        val stored = try {
+            window.localStorage.getItem("theme")
+        } catch (_: Throwable) {
+            null
+        }
+
+        isDarkTheme = when (stored) {
+            "light" -> false
+            "dark" -> true
+            else -> {
+                // No stored preference — respect the OS setting.
+                val prefersDark = window.matchMedia("(prefers-color-scheme: dark)")
+                prefersDark.matches
+            }
+        }
+        applyThemeToBody()
+    }
+
+    private fun applyThemeToBody() {
+        val body = document.body ?: return
+        if (isDarkTheme) {
+            body.classList.remove("light-theme")
+        } else {
+            body.classList.add("light-theme")
+        }
+    }
     fun navigateTo(route: String) {
         currentRoute = route
         window.history.pushState(null, "", "/#/$route")

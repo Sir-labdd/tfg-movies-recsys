@@ -71,6 +71,17 @@ fun NavBar() {
             Text("TFG Movies")
         }
 
+        // ---- Theme toggle ----
+        Button(
+            attrs = {
+                classes("navbar-theme-toggle")
+                onClick { AppState.toggleTheme() }
+                attr("title", if (AppState.isDarkTheme) "Cambiar a modo claro" else "Cambiar a modo oscuro")
+            },
+        ) {
+            Text(if (AppState.isDarkTheme) "☀️" else "🌙")
+        }
+
         // ---- Search with autocomplete ----
         Div(attrs = { classes("navbar-search") }) {
             Input(InputType.Text) {
@@ -331,6 +342,22 @@ object NavBarStyles : StyleSheet() {
         ".search-dropdown::-webkit-scrollbar-thumb" style {
             property("background", "var(--border)")
             property("border-radius", "3px")
+        }
+
+        ".navbar-theme-toggle" style {
+            property("background", "none")
+            property("border", "none")
+            property("font-size", "var(--font-size-lg)")
+            property("cursor", "pointer")
+            property("padding", "var(--space-1)")
+            property("line-height", "1")
+            property("transition", "transform 0.2s ease")
+        }
+
+        ".navbar-theme-toggle:hover" style {
+            property("transform", "scale(1.2)")
+            property("background", "none")
+            property("border", "none")
         }
     }
 }

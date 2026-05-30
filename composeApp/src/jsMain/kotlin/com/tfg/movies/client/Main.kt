@@ -17,7 +17,7 @@ import org.jetbrains.compose.web.renderComposable
 
 fun main() {
     AppState.initPopStateListener()
-
+    AppState.initTheme()
     renderComposable(rootElementId = "root") {
         App()
     }
