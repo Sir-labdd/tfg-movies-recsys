@@ -81,3 +81,38 @@ val copyFrontend by tasks.registering(Copy::class) {
 tasks.named("classes") {
     dependsOn(copyFrontend)
 }
+
+// ============================================================================
+// Custom run task that loads environment variables from .env.
+//
+// The standard :server:run task (managed by the Ktor plugin) does not
+// reliably receive environment variables configured in IntelliJ's
+// Gradle run configuration. This custom task creates a JavaExec we
+// fully control: classpath, main class, and environment are all set
+// explicitly, with no dependency on the Ktor plugin's wiring.
+//
+// Usage from IntelliJ: create a Gradle run configuration with
+// task ":server:runDev". Usage from terminal:
+//   ./gradlew :server:runDev
+// ============================================================================
+tasks.register<JavaExec>("runDev") {
+    dependsOn("classes", "copyFrontend")
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.tfg.movies.server.ApplicationKt")
+
+    // Load .env from project root.
+    val envFile = rootProject.file(".env")
+    if (envFile.exists()) {
+        envFile.readLines()
+            .filter { it.contains("=") && !it.trimStart().startsWith("#") }
+            .forEach { line ->
+                val parts = line.split("=", limit = 2)
+                if (parts.size == 2) {
+                    environment(parts[0].trim(), parts[1].trim())
+                }
+            }
+    }
+
+    // Enable Ktor development mode for auto-reload.
+    jvmArgs("-Dio.ktor.development=true")
+}
