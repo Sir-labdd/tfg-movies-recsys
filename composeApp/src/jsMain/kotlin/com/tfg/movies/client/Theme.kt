@@ -43,7 +43,7 @@ object AppStyle : StyleSheet() {
             property("--text-secondary", "#8b949e")
             property("--text-muted", "#6e7681")
 
-            // Accent — amber, used sparingly on interactive elements
+            // Accent — lavender, used sparingly on interactive elements
             // and key highlights. Avoids the Netflix-red cliché.
             property("--accent", "#a78bfa")
             property("--accent-hover", "#c4b5fd")
@@ -155,8 +155,8 @@ object AppStyle : StyleSheet() {
         // ----------------------------------------------------------------
         // Buttons. Three variants:
         //   - default <button>: secondary action ("ghost" style with
-        //     amber border on hover).
-        //   - .btn-primary: primary action (amber filled).
+        //     accent border on hover).
+        //   - .btn-primary: primary action (accent filled).
         //   - .btn-disabled state: applies to both.
         // ----------------------------------------------------------------
         "button" style {
@@ -189,7 +189,7 @@ object AppStyle : StyleSheet() {
             property("color", "var(--text-primary)")
         }
 
-        // Primary action button — filled amber, used for the main
+        // Primary action button — filled accent, used for the main
         // action on each screen.
         ".btn-primary" style {
             property("background-color", "var(--accent)")

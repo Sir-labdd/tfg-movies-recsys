@@ -7,8 +7,8 @@ import kotlinx.serialization.Serializable
  * any client (e.g. Compose Multiplatform frontend).
  *
  * Living in :shared/commonMain means they compile for every target
- * declared in the module (currently only JVM, JS will be added when
- * the frontend module is introduced).
+ * declared in the module (currently JVM and JS (browser). The JVM target is consumed by
+ * :server, the JS target by :composeApp).
  *
  * No JVM-specific imports (java.sql, java.time, etc.) are allowed in
  * this file — that constraint is what keeps the module truly shareable.

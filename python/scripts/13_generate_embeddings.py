@@ -6,9 +6,9 @@ Writes: movie_embeddings table.
 
 Pipeline:
 1. Connect to PostgreSQL and register the pgvector adapter so that
-   NumPy arrays can be inserted directly into the 'vector(384)' column.
-2. Load the all-MiniLM-L6-v2 sentence-transformers model. First run
-   downloads it from HuggingFace (~90 MB) into the local cache; later
+   NumPy arrays can be inserted directly into the 'vector(768)' column.
+2. Load the all-mpnet-base-v2 sentence-transformers model. First run
+   downloads it from HuggingFace (~420 MB) into the local cache; later
    runs read from cache.
 3. Fetch the candidate movies: those with overview length >= 30 chars.
    The cleaning pipeline already replaced placeholder synopses with

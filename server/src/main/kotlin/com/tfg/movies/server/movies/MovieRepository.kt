@@ -299,7 +299,7 @@ class MovieRepository {
         // is fetched via a subquery rather than as a parameter, because
         // pgvector's similarity operators expect a `vector` type and
         // letting PostgreSQL handle it server-side avoids round-trip
-        // serialization of a 384-float array.
+        // serialization of a 768-float array.
         val voteCondition = if (minVoteCount != null) "AND m.vote_count >= ?" else ""
 
         val sql = """

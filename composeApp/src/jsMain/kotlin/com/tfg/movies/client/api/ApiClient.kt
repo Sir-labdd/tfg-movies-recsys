@@ -93,7 +93,8 @@ object ApiClient {
      */
 
     @PublishedApi
-    internal suspend fun mapErrorResponse(response: HttpResponse): ApiException {       return try {
+    internal suspend fun mapErrorResponse(response: HttpResponse): ApiException {
+        return try {
             val body = response.body<ErrorResponse>()
             ApiException(
                 status = response.status.value,
