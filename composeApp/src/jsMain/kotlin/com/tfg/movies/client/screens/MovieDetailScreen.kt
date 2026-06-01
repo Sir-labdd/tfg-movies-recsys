@@ -27,9 +27,10 @@ import org.jetbrains.compose.web.dom.Text
 /**
  * Detail screen for a single movie.
  *
- * Shows full movie information (poster, synopsis, cast, metadata)
- * and a horizontal row of similar-movie recommendations powered
- * by the semantic embedding system built in block B6.
+ * Fetches full movie information from GET /movies/{id} and semantic
+ * recommendations from GET /movies/{id}/similar, then renders a
+ * hero layout with poster, metadata, synopsis, cast grid and a
+ * horizontal row of similar-movie cards.
  */
 @Composable
 fun MovieDetailScreen(movieId: Int) {

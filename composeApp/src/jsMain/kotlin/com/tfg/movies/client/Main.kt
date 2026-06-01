@@ -15,6 +15,14 @@ import com.tfg.movies.client.state.AppState
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.renderComposable
 
+/**
+ * Entry point and root composable of the web client.
+ *
+ * Initializes the browser history listener and the theme, then
+ * renders the [App] composable which injects all stylesheets and
+ * dispatches to the appropriate screen based on [AppState.currentRoute].
+ */
+
 fun main() {
     AppState.initPopStateListener()
     AppState.initTheme()

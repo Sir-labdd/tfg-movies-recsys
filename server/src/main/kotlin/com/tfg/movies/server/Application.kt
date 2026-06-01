@@ -14,6 +14,15 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.routing.*
 import io.ktor.server.http.content.staticResources
 
+/**
+ * Ktor application entry point and module configuration.
+ *
+ * Installs ContentNegotiation (JSON), CallLogging, and CORS plugins,
+ * initializes the database connection pool, wires the service layer,
+ * and registers all route families (health, movies, genres) plus
+ * static file serving for the production frontend bundle.
+ */
+
 fun main(args: Array<String>) {
     EngineMain.main(args)
 }

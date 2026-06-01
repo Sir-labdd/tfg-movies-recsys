@@ -26,11 +26,10 @@ import org.w3c.dom.HTMLInputElement
 /**
  * Persistent navigation bar with live search autocomplete.
  *
- * As the user types (2+ characters), a debounced search fires after
- * 300ms of inactivity. Results appear in a dropdown overlay below
- * the input. Clicking a result navigates to the detail screen and
- * closes the dropdown. Pressing Enter or the "Buscar" button
- * navigates to the full search results screen.
+ * Rendered at the top of every screen via [App]. Contains the
+ * application title (clickable, navigates to listing), a theme
+ * toggle button, and a search input with debounced autocomplete
+ * dropdown.
  */
 @Composable
 fun NavBar() {
